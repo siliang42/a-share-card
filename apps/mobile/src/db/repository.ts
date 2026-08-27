@@ -40,6 +40,41 @@ export type StockRecord = {
   businessSummarySource: string | null;
 };
 
+export type CatalogDeck = {
+  id: string;
+  name: string;
+  taxonomy: "market" | string;
+  stockCount: number;
+};
+
+export type LocalCatalog = {markets: CatalogDeck[]; sectors: CatalogDeck[]};
+
+export type LocalQuote = {
+  stockId: string;
+  price: number;
+  changePercent: number;
+  source: string;
+  sourceTime: string;
+  freshness: string;
+  fetchedAt: string;
+};
+
+export type BrowseStockRecord = StockRecord & {
+  primarySector: string | null;
+  sectorNames: string[];
+  quote: LocalQuote | null;
+  isFavorite: boolean;
+  memoryStatus: string;
+};
+
+const MARKET_DECKS = [
+  {board: "SH_MAIN", name: "沪市主板"},
+  {board: "SZ_MAIN", name: "深市主板"},
+  {board: "CHINEXT", name: "创业板"},
+  {board: "STAR", name: "科创板"},
+  {board: "BSE", name: "北交所"},
+] as const;
+
 export async function openDatabase(name = "gushi.db"): Promise<SqlDatabase> {
   const database = await openDatabaseAsync(name);
   const db = database as unknown as SqlDatabase;
@@ -111,6 +146,186 @@ export class StockRepository {
       businessSummary: row.business_summary,
       businessSummarySource: row.business_summary_source,
     } : null;
+  }
+
+  async getCatalog(): Promise<LocalCatalog> {
+    const marketRows = await this.db.getAllAsync<{board: string; stock_count: number}>(
+      "SELECT UPPER(board) AS board, COUNT(*) AS stock_count FROM stocks GROUP BY UPPER(board)",
+    );
+    const marketCounts = new Map(marketRows.map((row) => [row.board, row.stock_count]));
+    const sectors = await this.db.getAllAsync<{
+      id: string;
+      taxonomy: string;
+      name: string;
+      stock_count: number;
+    }>(
+      `SELECT sectors.id, sectors.taxonomy, sectors.name, COUNT(stock_sectors.stock_id) AS stock_count
+       FROM sectors
+       LEFT JOIN stock_sectors ON stock_sectors.sector_id = sectors.id
+       GROUP BY sectors.id, sectors.taxonomy, sectors.name
+       ORDER BY sectors.taxonomy, sectors.name`,
+    );
+    return {
+      markets: MARKET_DECKS.map(({board, name}) => ({
+        id: `market:${board.toLowerCase()}`,
+        name,
+        taxonomy: "market",
+        stockCount: marketCounts.get(board) ?? 0,
+      })),
+      sectors: sectors.map((row) => ({
+        id: `sector:${row.id}`,
+        name: row.name,
+        taxonomy: row.taxonomy,
+        stockCount: row.stock_count,
+      })),
+    };
+  }
+
+  async listStocks(options: {
+    deckId?: string;
+    query?: string;
+    favoritesOnly?: boolean;
+    stockId?: string;
+  } = {}): Promise<BrowseStockRecord[]> {
+    const where: string[] = [];
+    const params: unknown[] = [];
+    if (options.stockId) {
+      where.push("stocks.id = ?");
+      params.push(options.stockId);
+    }
+    if (options.deckId?.startsWith("market:") && options.deckId !== "market:all") {
+      where.push("UPPER(stocks.board) = ?");
+      params.push(options.deckId.slice("market:".length).toUpperCase());
+    }
+    if (options.deckId?.startsWith("sector:")) {
+      where.push("EXISTS (SELECT 1 FROM stock_sectors filter_membership WHERE filter_membership.stock_id = stocks.id AND filter_membership.sector_id = ?)");
+      params.push(options.deckId.slice("sector:".length));
+    }
+    if (options.query?.trim()) {
+      where.push("(stocks.name LIKE ? OR stocks.symbol LIKE ?)");
+      const query = `%${options.query.trim()}%`;
+      params.push(query, query);
+    }
+    if (options.favoritesOnly) where.push("favorites.stock_id IS NOT NULL");
+    const rows = await this.db.getAllAsync<{
+      id: string;
+      symbol: string;
+      name: string;
+      board: string;
+      business_summary: string | null;
+      business_summary_source: string | null;
+      sector_names: string | null;
+      price: number | null;
+      change_percent: number | null;
+      quote_source: string | null;
+      source_time: string | null;
+      freshness: string | null;
+      fetched_at: string | null;
+      favorite_id: string | null;
+      repetitions: number | null;
+      due_at: string | null;
+    }>(
+      `SELECT stocks.*,
+        (SELECT GROUP_CONCAT(sectors.name, '|')
+          FROM stock_sectors
+          JOIN sectors ON sectors.id = stock_sectors.sector_id
+          WHERE stock_sectors.stock_id = stocks.id
+          ORDER BY CASE sectors.taxonomy WHEN 'shenwan' THEN 0 ELSE 1 END, sectors.name) AS sector_names,
+        latest_quotes.price, latest_quotes.change_percent, latest_quotes.source AS quote_source,
+        latest_quotes.source_time, latest_quotes.freshness, latest_quotes.fetched_at,
+        favorites.stock_id AS favorite_id,
+        progress.repetitions, progress.due_at
+       FROM stocks
+       LEFT JOIN latest_quotes ON latest_quotes.stock_id = stocks.id
+       LEFT JOIN favorites ON favorites.stock_id = stocks.id
+       LEFT JOIN card_progress progress ON progress.stock_id = stocks.id AND progress.direction = 'name_to_profile'
+       ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+       ORDER BY stocks.symbol, stocks.id`,
+      ...params,
+    );
+    const now = Date.now();
+    return rows.map((row) => {
+      const sectorNames = row.sector_names?.split("|").filter(Boolean) ?? [];
+      const quote = row.price === null || row.change_percent === null || !row.quote_source
+        || !row.source_time || !row.freshness || !row.fetched_at
+        ? null
+        : {
+          stockId: row.id,
+          price: Number(row.price),
+          changePercent: Number(row.change_percent),
+          source: row.quote_source,
+          sourceTime: row.source_time,
+          freshness: row.freshness,
+          fetchedAt: row.fetched_at,
+        };
+      return {
+        id: row.id,
+        symbol: row.symbol,
+        name: row.name,
+        board: row.board,
+        businessSummary: row.business_summary,
+        businessSummarySource: row.business_summary_source,
+        primarySector: sectorNames[0] ?? null,
+        sectorNames,
+        quote,
+        isFavorite: Boolean(row.favorite_id),
+        memoryStatus: !row.repetitions
+          ? "未学习"
+          : row.due_at && Date.parse(row.due_at) <= now ? "待复习" : "学习中",
+      };
+    });
+  }
+
+  async upsertQuotes(quotes: Array<Omit<LocalQuote, "fetchedAt">>, fetchedAt: string): Promise<void> {
+    await this.db.withTransactionAsync(async () => {
+      const statement = await this.db.prepareAsync(
+        `INSERT INTO latest_quotes
+          (stock_id, price, change_percent, source, source_time, freshness, fetched_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(stock_id) DO UPDATE SET
+          price = excluded.price, change_percent = excluded.change_percent,
+          source = excluded.source, source_time = excluded.source_time,
+          freshness = excluded.freshness, fetched_at = excluded.fetched_at`,
+      );
+      try {
+        for (const quote of quotes) {
+          await statement.executeAsync(
+            quote.stockId,
+            quote.price,
+            quote.changePercent,
+            quote.source,
+            quote.sourceTime,
+            quote.freshness,
+            fetchedAt,
+          );
+        }
+      } finally {
+        await statement.finalizeAsync();
+      }
+    });
+  }
+
+  async getQuotes(stockIds: string[]): Promise<LocalQuote[]> {
+    if (!stockIds.length) return [];
+    const placeholders = stockIds.map(() => "?").join(", ");
+    const rows = await this.db.getAllAsync<{
+      stock_id: string;
+      price: number;
+      change_percent: number;
+      source: string;
+      source_time: string;
+      freshness: string;
+      fetched_at: string;
+    }>(`SELECT * FROM latest_quotes WHERE stock_id IN (${placeholders})`, ...stockIds);
+    return rows.map((row) => ({
+      stockId: row.stock_id,
+      price: Number(row.price),
+      changePercent: Number(row.change_percent),
+      source: row.source,
+      sourceTime: row.source_time,
+      freshness: row.freshness,
+      fetchedAt: row.fetched_at,
+    }));
   }
 
   async saveProgress(progress: {
