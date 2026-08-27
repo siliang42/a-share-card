@@ -1,6 +1,6 @@
 import type {SqlDatabase} from "./repository";
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 const INITIAL_SCHEMA = `
   PRAGMA journal_mode = WAL;
@@ -100,13 +100,27 @@ const INITIAL_SCHEMA = `
     updated_at TEXT NOT NULL
   );
 
-  PRAGMA user_version = ${SCHEMA_VERSION};
+  PRAGMA user_version = 1;
+`;
+
+const STUDY_UNDO_SCHEMA = `
+  ALTER TABLE study_events ADD COLUMN session_id TEXT NOT NULL DEFAULT '';
+  ALTER TABLE study_events ADD COLUMN mode TEXT NOT NULL DEFAULT 'sequential';
+  ALTER TABLE study_events ADD COLUMN previous_checkpoint_stock_id TEXT;
+  ALTER TABLE study_events ADD COLUMN resulting_checkpoint_stock_id TEXT;
+  CREATE INDEX IF NOT EXISTS idx_study_events_session_time ON study_events(session_id, studied_at);
+  PRAGMA user_version = 2;
 `;
 
 export async function runMigrations(db: SqlDatabase): Promise<void> {
   await db.execAsync("PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;");
   const row = await db.getFirstAsync<{user_version: number}>("PRAGMA user_version");
-  if ((row?.user_version ?? 0) < SCHEMA_VERSION) {
+  let version = row?.user_version ?? 0;
+  if (version < 1) {
     await db.execAsync(INITIAL_SCHEMA);
+    version = 1;
+  }
+  if (version < SCHEMA_VERSION) {
+    await db.execAsync(STUDY_UNDO_SCHEMA);
   }
 }

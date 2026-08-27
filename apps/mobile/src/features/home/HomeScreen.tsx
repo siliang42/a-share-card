@@ -4,8 +4,8 @@ import {Pressable, ScrollView, StyleSheet, Text, View} from "react-native";
 import {colors, tabularNumbers} from "@/src/theme/tokens";
 
 export type HomeSnapshot = {
-  marketStrip: Array<{id: string; name: string; value: string; changePercent: number}>;
-  progress: {completed: number; target: number; due: number; streakDays: number};
+  marketStrip: Array<{id: string; name: string; value: string; changePercent: number | null}>;
+  progress: {completed: number; target: number; due: number; streakDays: number; remembered?: number; again?: number};
   continueDeck: {id: string; name: string; nextStockName?: string | null} | null;
   marketDeckCount: number;
   sectorDeckCount: number;
@@ -43,8 +43,8 @@ export function HomeScreen({
           <View key={market.id} style={styles.marketItem}>
             <Text style={styles.marketName}>{market.name}</Text>
             <Text style={styles.marketValue}>{market.value}</Text>
-            <Text style={[styles.marketChange, market.changePercent >= 0 ? styles.rise : styles.fall]}>
-              {signedPercent(market.changePercent)}
+            <Text style={[styles.marketChange, market.changePercent == null ? styles.mutedChange : market.changePercent >= 0 ? styles.rise : styles.fall]}>
+              {market.changePercent == null ? "等待行情" : signedPercent(market.changePercent)}
             </Text>
           </View>
         ))}
@@ -60,6 +60,11 @@ export function HomeScreen({
         </View>
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, {width: `${Math.round(progress * 100)}%`}]} />
+        </View>
+        <View style={styles.studyStats}>
+          <Text style={styles.studyStat}>记得 {snapshot.progress.remembered ?? 0}</Text>
+          <Text style={styles.studyStat}>需加强 {snapshot.progress.again ?? 0}</Text>
+          <Text style={styles.studyStat}>待复习 {snapshot.progress.due}</Text>
         </View>
         {snapshot.continueDeck ? (
           <Pressable
@@ -138,6 +143,7 @@ const styles = StyleSheet.create({
   marketChange: {...tabularNumbers, marginTop: 2, fontSize: 11, fontWeight: "600"},
   rise: {color: colors.rise},
   fall: {color: colors.fall},
+  mutedChange: {color: colors.faint},
   progressBand: {marginTop: 18, padding: 18, borderRadius: 7, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border},
   progressTop: {flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end"},
   sectionLabel: {fontSize: 12, fontWeight: "600", color: colors.muted},
@@ -145,6 +151,8 @@ const styles = StyleSheet.create({
   dueText: {fontSize: 12, fontWeight: "600", color: colors.muted},
   progressTrack: {height: 6, marginTop: 12, overflow: "hidden", borderRadius: 3, backgroundColor: "#E7EBEF"},
   progressFill: {height: 6, backgroundColor: colors.study},
+  studyStats: {marginTop: 10, flexDirection: "row", gap: 14},
+  studyStat: {fontSize: 10, color: colors.muted},
   continueButton: {minHeight: 58, marginTop: 18, paddingHorizontal: 15, flexDirection: "row", alignItems: "center", gap: 11, borderRadius: 6, backgroundColor: colors.inkBlue},
   pressed: {backgroundColor: colors.inkBlueDark},
   continueCopy: {flex: 1, minWidth: 0},
