@@ -12,6 +12,10 @@
     "test:api": "make test-api",
     "dev": "make dev"
   },
+  "devDependencies": {
+    "openapi-typescript": "^7.9.1",
+    "typescript": "^5.9.2"
+  },
   "engines": {
     "node": ">=22"
   }
