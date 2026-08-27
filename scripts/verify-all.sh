@@ -27,7 +27,8 @@ trap cleanup EXIT
 echo "[1/8] API tests"
 (cd "${root_dir}/services/api" && uv run pytest -q)
 
-echo "[2/8] Admin tests, types, and production build"
+echo "[2/8] Contracts build and admin tests, types, and production build"
+(cd "${root_dir}" && npm --workspace @gushi/contracts run build)
 (cd "${root_dir}" && npm --workspace @gushi/admin test -- --run)
 (cd "${root_dir}" && npm --workspace @gushi/admin run typecheck)
 (cd "${root_dir}" && npm --workspace @gushi/admin run build)
