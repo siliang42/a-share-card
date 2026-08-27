@@ -1,0 +1,40 @@
+{
+  "name": "@gushi/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo start --ios",
+    "android": "expo start --android",
+    "test": "jest",
+    "typecheck": "tsc --noEmit",
+    "export:android": "expo export --platform android"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^15.0.3",
+    "@gushi/contracts": "*",
+    "@noble/hashes": "^2.3.0",
+    "expo": "~57.0.17",
+    "expo-router": "~57.0.17",
+    "expo-secure-store": "~57.0.2",
+    "expo-sqlite": "~57.0.2",
+    "expo-status-bar": "~57.0.1",
+    "fflate": "^0.8.3",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0"
+  },
+  "devDependencies": {
+    "@testing-library/react-native": "^14.0.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/jest": "^29.5.14",
+    "@types/react": "~19.2.2",
+    "better-sqlite3": "^13.0.3",
+    "jest": "^29.7.0",
+    "jest-expo": "~57.0.5",
+    "react-test-renderer": "19.2.3",
+    "typescript": "~6.0.3"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "股识",
+    "slug": "gushi",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "gushi",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-router", "expo-secure-store", "expo-sqlite"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "cn.gushi.memory",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "股识需要连接同一局域网中的 Mac，以同步股票资料和获取最新行情。",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
+      }
+    },
+    "android": {
+      "package": "cn.gushi.memory",
+      "usesCleartextTraffic": true,
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
