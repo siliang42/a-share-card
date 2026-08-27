@@ -14,10 +14,10 @@ describe("offline catalog repositories", () => {
         ('SZ:000400', '000400', '许继电气', 'sz_main');
       INSERT INTO sectors (id, taxonomy, name) VALUES
         ('shenwan:801120', 'shenwan', '食品饮料'),
-        ('concept:bk0456', 'concept', '智能电网');
+        ('eastmoney_concept:BK0456', 'eastmoney_concept', '智能电网');
       INSERT INTO stock_sectors (stock_id, sector_id) VALUES
         ('SH:600519', 'shenwan:801120'),
-        ('SZ:000400', 'concept:bk0456');
+        ('SZ:000400', 'eastmoney_concept:BK0456');
     `);
 
     const catalog = await new StockRepository(db).getCatalog();
@@ -27,7 +27,7 @@ describe("offline catalog repositories", () => {
       expect.objectContaining({id: "market:sz_main", name: "深市主板", stockCount: 1}),
     ]));
     expect(catalog.sectors).toEqual(expect.arrayContaining([
-      expect.objectContaining({id: "sector:concept:bk0456", name: "智能电网", taxonomy: "concept"}),
+      expect.objectContaining({id: "sector:eastmoney_concept:BK0456", name: "智能电网", taxonomy: "eastmoney_concept"}),
     ]));
     db.close();
   });

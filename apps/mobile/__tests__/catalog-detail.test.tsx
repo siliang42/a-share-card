@@ -10,7 +10,7 @@ const catalog = {
   ],
   sectors: [
     {id: "sector:shenwan:801120", name: "食品饮料", taxonomy: "shenwan", stockCount: 128},
-    {id: "sector:concept:bk0456", name: "智能电网", taxonomy: "concept", stockCount: 93},
+    {id: "sector:eastmoney_concept:BK0456", name: "智能电网", taxonomy: "eastmoney_concept", stockCount: 93},
   ],
 };
 
@@ -22,8 +22,9 @@ describe("MarketCatalog", () => {
     expect(view.getByText("股票市场")).toBeVisible();
     expect(view.getByText("申万行业")).toBeVisible();
     expect(view.getByText("热门概念")).toBeVisible();
+    expect(view.queryByText("其他分类")).toBeNull();
     await fireEvent.press(view.getByRole("button", {name: /智能电网/}));
-    expect(openDeck).toHaveBeenCalledWith("sector:concept:bk0456");
+    expect(openDeck).toHaveBeenCalledWith("sector:eastmoney_concept:BK0456");
   });
 });
 

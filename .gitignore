@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 .superpowers/
+.playwright-cli/
 .worktrees/
 node_modules/
 .next/
@@ -11,6 +12,7 @@ dist/
 coverage/
 test-results/
 playwright-report/
+output/
 *.tsbuildinfo
 __pycache__/
 .pytest_cache/

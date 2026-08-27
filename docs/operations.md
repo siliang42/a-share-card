@@ -115,3 +115,52 @@ docker compose -f infra/docker-compose.yml config
 ./scripts/smoke-local.sh
 make test
 ```
+
+## 完整发布验收
+
+确定性验收不会访问公网数据源。它从 `services/api/app/fixtures/demo_seed.json` 读取五个市场的原始响应样例，经生产环境相同的股票、申万、概念、公司资料和行情 parser 规范化后写入临时 SQLite，再发布手机数据集。临时 Compose 项目、数据库和端口不会污染日常 `data/` 或正在运行的默认服务。
+
+```bash
+./scripts/verify-all.sh
+```
+
+该命令依次执行 API、后台、移动端测试与类型检查，后台生产构建，Compose 构建与冒烟检查，后台 Playwright E2E、Android Expo 导出。桌面 `1440x900` 与移动 `390x844` 截图生成在 `output/playwright/`，该目录不会提交到 Git。
+
+默认验收端口为 API `18080`、后台 `13011`，冲突时可覆盖：
+
+```bash
+GUSHI_VERIFY_API_PORT=18081 GUSHI_VERIFY_ADMIN_PORT=13012 ./scripts/verify-all.sh
+```
+
+### iOS 模拟器断点验收
+
+iOS 流程要求完整 Xcode、已启动的 iOS Simulator、Maestro，以及已安装在模拟器中的 `cn.gushi.memory`。首次验收先安装 App：
+
+```bash
+cd apps/mobile
+npx expo run:ios
+cd ../..
+```
+
+条件齐全时 `verify-all.sh` 会完成配对、进入“电力设备”牌组、评分第一张卡片、终止 App、重新启动，并确认仍从第二张“宁德时代”继续。脚本不会自动生成或删除 `apps/mobile/ios`，避免覆盖原生工程改动。
+
+安装 Maestro 并启动模拟器后，可强制要求 iOS 验收；缺少任何前提时命令会失败而不是跳过：
+
+```bash
+GUSHI_RUN_IOS=1 ./scripts/verify-all.sh
+```
+
+只运行 Maestro 流程时，先保证临时 API 已发布数据集并把令牌作为环境变量传入，不要把令牌写进 YAML：
+
+```bash
+maestro test \
+  -e GUSHI_MAESTRO_API_URL=http://127.0.0.1:18080 \
+  -e GUSHI_MAESTRO_PAIRING_TOKEN="<temporary-token>" \
+  apps/mobile/.maestro/primary-flow.yaml
+```
+
+当前共享代码同时保留 Android 配置；`verify-all.sh` 每次都会执行 `npx expo export --platform android`，用于发现路由、依赖和打包层面的跨平台回归。
+
+## 公网数据源验收
+
+公网检查与确定性测试分离，且不会由 `verify-all.sh` 自动触发。准备发布真实全市场数据时，再人工执行全量同步并确认沪市主板、深市主板、创业板、科创板、北交所均非空；申万牌组的 taxonomy 必须为 `shenwan`，不得用东方财富行业字段代替。公开接口可能限流或临时不可用，失败时保留上一个已发布数据集。

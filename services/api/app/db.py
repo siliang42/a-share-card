@@ -5,18 +5,24 @@ from pathlib import Path
 from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 from .config import Settings
 
 
 def create_engine_for(settings: Settings) -> Engine:
     url = make_url(settings.database_url)
-    if url.get_backend_name() == "sqlite" and url.database not in (None, "", ":memory:"):
+    is_file_sqlite = (
+        url.get_backend_name() == "sqlite"
+        and url.database not in (None, "", ":memory:")
+    )
+    if is_file_sqlite:
         Path(url.database).expanduser().resolve().parent.mkdir(parents=True, exist_ok=True)
 
     engine = create_engine(
         settings.database_url,
         connect_args={"check_same_thread": False} if url.get_backend_name() == "sqlite" else {},
+        poolclass=NullPool if is_file_sqlite else None,
     )
 
     if url.get_backend_name() == "sqlite":

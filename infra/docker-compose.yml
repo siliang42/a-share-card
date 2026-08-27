@@ -8,10 +8,10 @@ x-api-runtime: &api-runtime
     GUSHI_DATABASE_URL: sqlite:////data/gushi.db
     GUSHI_DATA_DIR: /data
     GUSHI_PAIRING_TOKEN_FILE: /data/pairing-token
-    GUSHI_QUOTE_REFRESH_SECONDS: "15"
+    GUSHI_QUOTE_REFRESH_SECONDS: "${GUSHI_QUOTE_REFRESH_SECONDS:-15}"
     GUSHI_TIMEZONE: Asia/Shanghai
   volumes:
-    - ../data:/data
+    - ${GUSHI_DATA_PATH:-../data}:/data
   restart: unless-stopped
 
 services:
@@ -19,7 +19,7 @@ services:
     <<: *api-runtime
     command: ["uv", "run", "--no-sync", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
     ports:
-      - "8000:8000"
+      - "${GUSHI_API_PORT:-8000}:8000"
     healthcheck:
       test: ["CMD", "uv", "run", "--no-sync", "python", "-c", "import json,urllib.request; assert json.load(urllib.request.urlopen('http://127.0.0.1:8000/health'))['status']=='ok'"]
       interval: 5s
@@ -42,9 +42,9 @@ services:
       GUSHI_API_URL: http://api:8000
       GUSHI_PAIRING_TOKEN_FILE: /data/pairing-token
     volumes:
-      - ../data:/data:ro
+      - ${GUSHI_DATA_PATH:-../data}:/data:ro
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:${GUSHI_ADMIN_PORT:-3000}:3000"
     depends_on:
       api:
         condition: service_healthy

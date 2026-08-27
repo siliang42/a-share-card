@@ -1,0 +1,32 @@
+appId: cn.gushi.memory
+---
+- launchApp:
+    clearState: true
+- tapOn: "设置"
+- tapOn: "Mac 服务地址"
+- inputText: ${GUSHI_MAESTRO_API_URL}
+- tapOn: "配对令牌"
+- inputText: ${GUSHI_MAESTRO_PAIRING_TOKEN}
+- tapOn: "保存并连接"
+- extendedWaitUntil:
+    visible: "连接信息已保存"
+    timeout: 30000
+- tapOn: "市场"
+- scrollUntilVisible:
+    element:
+      text: "电力设备，2 只股票"
+    direction: DOWN
+- tapOn: "电力设备，2 只股票"
+- tapOn: "开始背诵"
+- assertVisible: "许继电气"
+- tapOn: "显示答案"
+- tapOn: "记得"
+- assertVisible: "宁德时代"
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: "继续学习"
+    timeout: 15000
+- assertVisible: "电力设备"
+- tapOn: "继续学习 电力设备"
+- assertVisible: "宁德时代"

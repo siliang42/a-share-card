@@ -41,8 +41,9 @@ export function MarketCatalog({
     return value ? catalog.sectors.filter((deck) => deck.name.toLocaleLowerCase().includes(value)) : catalog.sectors;
   }, [catalog.sectors, query]);
   const shenwan = matches.filter((deck) => deck.taxonomy === "shenwan");
-  const concepts = matches.filter((deck) => deck.taxonomy === "concept");
-  const other = matches.filter((deck) => !["shenwan", "concept"].includes(deck.taxonomy));
+  const conceptTaxonomies = ["eastmoney_concept", "concept"];
+  const concepts = matches.filter((deck) => conceptTaxonomies.includes(deck.taxonomy));
+  const other = matches.filter((deck) => !["shenwan", ...conceptTaxonomies].includes(deck.taxonomy));
 
   return (
     <ScrollView style={styles.root} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">

@@ -5,6 +5,7 @@ import {ActivityIndicator, StyleSheet, Text, View} from "react-native";
 import {useDatabase} from "@/src/db/DatabaseProvider";
 import {StockRepository} from "@/src/db/repository";
 import {HomeScreen, type HomeSnapshot} from "@/src/features/home/HomeScreen";
+import {resolveContinueDeck} from "@/src/features/home/continueDeck";
 import {ProgressRepository} from "@/src/features/study/progressRepository";
 import {colors} from "@/src/theme/tokens";
 
@@ -17,7 +18,7 @@ export default function TodayRoute() {
     const progressRepository = new ProgressRepository(db);
     Promise.all([repository.getCatalog(), repository.getSetting("daily_target"), repository.getSetting("last_deck_id"), progressRepository.getStudyOverview(new Date())])
       .then(([catalog, dailyTarget, lastDeckId, overview]) => {
-        const deck = catalog.markets.find((item) => item.id === lastDeckId) ?? catalog.markets[0] ?? null;
+        const deck = resolveContinueDeck(catalog, lastDeckId);
         setSnapshot({
           marketStrip: [
             {id: "sse", name: "上证", value: "--", changePercent: null},
