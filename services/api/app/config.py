@@ -6,8 +6,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    database_url: str = "sqlite:///./data/gushi.db"
-    data_dir: Path = Path("./data")
+    database_url: str = "sqlite:///../../data/gushi.db"
+    data_dir: Path = Path("../../data")
     pairing_token: str = "local-development-token"
     quote_refresh_seconds: int = 15
     timezone: str = "Asia/Shanghai"
