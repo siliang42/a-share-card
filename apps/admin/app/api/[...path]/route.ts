@@ -1,3 +1,5 @@
+import {readFile} from "node:fs/promises";
+
 type RouteContext = {
   params: Promise<{path: string[]}>;
 };
@@ -6,7 +8,10 @@ const METHODS_WITHOUT_BODY = new Set(["GET", "HEAD"]);
 
 async function forward(request: Request, context: RouteContext): Promise<Response> {
   const apiUrl = process.env.GUSHI_API_URL;
-  const token = process.env.GUSHI_PAIRING_TOKEN;
+  let token = process.env.GUSHI_PAIRING_TOKEN;
+  if (!token && process.env.GUSHI_PAIRING_TOKEN_FILE) {
+    token = (await readFile(process.env.GUSHI_PAIRING_TOKEN_FILE, "utf8").catch(() => "")).trim();
+  }
   if (!apiUrl || !token) {
     return Response.json(
       {detail: "后台代理尚未配置 GUSHI_API_URL 和 GUSHI_PAIRING_TOKEN"},

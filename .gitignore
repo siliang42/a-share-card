@@ -18,5 +18,6 @@ __pycache__/
 *.pyc
 data/*.db
 data/*.db-*
+data/pairing-token
 data/raw/
 data/exports/
