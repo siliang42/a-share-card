@@ -1,6 +1,6 @@
 # 测试与故障排查 / Testing and Troubleshooting
 
-[首页](Home.md) | [快速开始](Getting-Started.md) | [架构](Architecture.md) | [数据与同步](Data-and-Sync.md) | [移动端](Mobile-App.md) | [运维](Operations.md)
+[首页](Home.md) | [快速开始](Getting-Started.md) | [Web 后台](Web-Admin.md) | [架构](Architecture.md) | [数据与同步](Data-and-Sync.md) | [移动端](Mobile-App.md) | [运维](Operations.md) | [项目状态](Project-Status.md)
 
 ## 中文
 

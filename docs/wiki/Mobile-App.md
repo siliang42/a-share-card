@@ -1,6 +1,6 @@
 # 移动端 / Mobile App
 
-[首页](Home.md) | [快速开始](Getting-Started.md) | [架构](Architecture.md) | [数据与同步](Data-and-Sync.md) | [运维](Operations.md) | [测试与排障](Testing-and-Troubleshooting.md)
+[首页](Home.md) | [快速开始](Getting-Started.md) | [Web 后台](Web-Admin.md) | [架构](Architecture.md) | [数据与同步](Data-and-Sync.md) | [运维](Operations.md) | [测试与排障](Testing-and-Troubleshooting.md) | [项目状态](Project-Status.md)
 
 ## 中文
 

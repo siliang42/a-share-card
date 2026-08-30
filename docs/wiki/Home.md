@@ -1,6 +1,6 @@
 # 股识 Wiki / Gushi Wiki
 
-[快速开始](Getting-Started.md) | [架构](Architecture.md) | [数据与同步](Data-and-Sync.md) | [移动端](Mobile-App.md) | [运维](Operations.md) | [测试与排障](Testing-and-Troubleshooting.md)
+[快速开始](Getting-Started.md) | [Web 后台](Web-Admin.md) | [架构](Architecture.md) | [数据与同步](Data-and-Sync.md) | [移动端](Mobile-App.md) | [运维](Operations.md) | [测试与排障](Testing-and-Troubleshooting.md) | [项目状态](Project-Status.md)
 
 ## 中文
 
@@ -11,11 +11,13 @@
 | 目标 | 建议阅读 |
 | --- | --- |
 | 第一次运行 | [快速开始](Getting-Started.md) |
+| 使用 Web 后台维护数据 | [Web 后台](Web-Admin.md) |
 | 理解各服务如何协作 | [系统架构](Architecture.md) |
 | 了解五个市场、板块和数据源 | [数据与同步](Data-and-Sync.md) |
 | 运行 iOS 或 Android App | [移动端](Mobile-App.md) |
 | 备份、恢复和查看日志 | [运维](Operations.md) |
 | 执行完整验收或处理故障 | [测试与故障排查](Testing-and-Troubleshooting.md) |
+| 查看当前实现边界 | [项目状态](Project-Status.md) |
 
 ### 产品边界
 
@@ -38,10 +40,12 @@ Gushi is a single-user, local-first A-share memory-learning system. The React Na
 | --- | --- |
 | Run the system for the first time | [Getting Started](Getting-Started.md) |
 | Understand component collaboration | [Architecture](Architecture.md) |
+| Operate the Web admin | [Web Admin](Web-Admin.md) |
 | Learn about the five markets, sectors, and sources | [Data and Synchronization](Data-and-Sync.md) |
 | Run the iOS or Android app | [Mobile App](Mobile-App.md) |
 | Back up, restore, and inspect logs | [Operations](Operations.md) |
 | Run release verification or diagnose failures | [Testing and Troubleshooting](Testing-and-Troubleshooting.md) |
+| Check implementation status and boundaries | [Project Status](Project-Status.md) |
 
 ### Product Boundaries
 

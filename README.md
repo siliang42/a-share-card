@@ -97,11 +97,13 @@ make test
 
 - [Wiki 首页](docs/wiki/Home.md)
 - [快速开始](docs/wiki/Getting-Started.md)
+- [Web 后台](docs/wiki/Web-Admin.md)
 - [系统架构](docs/wiki/Architecture.md)
 - [数据与同步](docs/wiki/Data-and-Sync.md)
 - [移动端](docs/wiki/Mobile-App.md)
 - [运维](docs/wiki/Operations.md)
 - [测试与故障排查](docs/wiki/Testing-and-Troubleshooting.md)
+- [项目状态](docs/wiki/Project-Status.md)
 - [详细本地运维手册](docs/operations.md)
 
 ### 数据与免责声明
@@ -185,11 +187,13 @@ make test
 
 - [Wiki home](docs/wiki/Home.md)
 - [Getting started](docs/wiki/Getting-Started.md)
+- [Web admin](docs/wiki/Web-Admin.md)
 - [Architecture](docs/wiki/Architecture.md)
 - [Data and synchronization](docs/wiki/Data-and-Sync.md)
 - [Mobile app](docs/wiki/Mobile-App.md)
 - [Operations](docs/wiki/Operations.md)
 - [Testing and troubleshooting](docs/wiki/Testing-and-Troubleshooting.md)
+- [Project status](docs/wiki/Project-Status.md)
 - [Detailed local operations runbook](docs/operations.md)
 
 ### Data and Disclaimer
